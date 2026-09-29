@@ -1,0 +1,26 @@
+services:
+  opponent:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-battleship}:${POSTGRES_PASSWORD:-local-development-only}@db:5432/${POSTGRES_DB:-battleship}
+    ports:
+      - "127.0.0.1:8001:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8000/ready', timeout=1)"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+  arena:
+    build: .
+    user: "0:0"
+    volumes:
+      - ./results:/results
+    depends_on:
+      api:
+        condition: service_healthy
+      opponent:
+        condition: service_healthy
+    command: [battleship-arena, --output, /results, match, "http://api:8000", "http://opponent:8000"]

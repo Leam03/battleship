@@ -1,0 +1,25 @@
+name: battleship-tests
+services:
+  test-db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: battleship_test
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U test -d battleship_test]
+      interval: 2s
+      timeout: 2s
+      retries: 20
+  tests:
+    build:
+      context: .
+      target: test
+    environment:
+      TEST_DATABASE_URL: postgresql+asyncpg://test:test@test-db:5432/battleship_test
+    depends_on:
+      test-db:
+        condition: service_healthy
+    command: [pytest, tests/unit, tests/integration, --cov, --cov-report=term-missing]
