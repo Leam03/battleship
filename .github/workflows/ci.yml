@@ -1,0 +1,52 @@
+name: CI
+on:
+  push:
+    branches: [main, 'codex/**']
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: battleship_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U test -d battleship_test"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/battleship_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.12.19'
+          python-version: '3.12'
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: uv run --frozen ruff check .
+      - run: uv run --frozen ruff format --check .
+      - run: uv run --frozen mypy
+      - run: uv run --frozen pytest tests/unit tests/integration --cov --cov-report=term-missing --cov-report=xml
+      - run: uv run --frozen coverage report --include='*/domain/*' --fail-under=95
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.xml
+      - run: docker compose -f compose.yaml -f compose.arena.yaml up --build -d --wait api opponent
+      - run: docker compose -f compose.yaml -f compose.arena.yaml run --rm arena
+      - run: |
+          uv run --frozen python -c "import json; r=json.load(open('results/results.json')); assert all(m['winner'] and not m['failures'] for m in r['matches'])"
+      - if: always()
+        run: docker compose -f compose.yaml -f compose.arena.yaml logs --no-color
+      - if: always()
+        run: docker compose -f compose.yaml -f compose.arena.yaml down -v
+

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Морской бой</title>
+  <link rel="stylesheet" href="/static/style.css?v=2">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <main>
+    <header>
+      <div><p class="eyebrow">ИГРА ПРОТИВ БОТА</p><h1>Морской бой<span>.</span></h1></div>
+      <span class="badge">10 кораблей · 20 палуб</span>
+    </header>
+    <section class="toolbar" aria-label="Управление игрой">
+      <div><strong id="status" role="status" aria-live="polite">Загружаем флот…</strong>
+        <p id="hint">Перетащите корабли на своём поле. Между ними должна оставаться одна клетка.</p></div>
+      <div class="actions">
+        <button id="random" type="button">Случайно</button>
+        <button id="rotate" type="button" disabled>Повернуть ↻</button>
+        <button id="start" class="primary" type="button" disabled>Начать бой</button>
+        <button id="reset" type="button" hidden>Новая игра</button>
+      </div>
+    </section>
+    <div class="boards">
+      <section class="panel">
+        <div class="panel-title"><div><span class="number">01</span><h2>Ваш флот</h2></div><span id="own-count">20 / 20</span></div>
+        <div class="board-wrap"><div id="own-board" class="board" aria-label="Ваше поле"></div><div id="ships" class="ship-layer"></div></div>
+        <p class="board-note" id="placement-note">Выберите корабль и нажмите «Повернуть» или R. Можно также выбрать корабль, затем нажать клетку для переноса.</p>
+      </section>
+      <section class="panel">
+        <div class="panel-title"><div><span class="number">02</span><h2>Поле противника</h2></div><span id="enemy-count">0 / 20</span></div>
+        <div class="board-wrap"><div id="enemy-board" class="board enemy" aria-label="Поле противника"></div></div>
+        <p class="board-note">Нажмите клетку, чтобы выстрелить. После попадания ход остаётся за вами.</p>
+      </section>
+    </div>
+    <footer><div class="legend"><span><i class="fleet-dot"></i>Корабль</span><span><i class="hit-dot"></i>Попадание</span><span><i class="miss-dot"></i>Промах</span></div><span>Первый ход — ваш</span></footer>
+    <details class="journal"><summary>Журнал текущего сеанса</summary><ol id="log" aria-live="polite"></ol></details>
+    <noscript>Для расстановки кораблей и игры необходимо включить JavaScript.</noscript>
+  </main>
+</body>
+</html>

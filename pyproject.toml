@@ -1,0 +1,65 @@
+[project]
+name = "battleship"
+version = "1.0.0"
+description = "Battleship service and tournament arena"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+    "alembic>=1.13,<2",
+    "asyncpg>=0.29,<1",
+    "fastapi>=0.115,<1",
+    "httpx>=0.27,<1",
+    "pydantic-settings>=2.6,<3",
+    "sqlalchemy[asyncio]>=2.0,<2.1",
+    "uvicorn>=0.30,<1",
+]
+
+[project.scripts]
+battleship-arena = "battleship.arena.cli:main"
+
+[dependency-groups]
+dev = [
+    "hypothesis>=6.100,<7",
+    "mypy>=1.13,<2",
+    "pytest>=8.3,<10",
+    "pytest-asyncio>=0.24,<2",
+    "pytest-cov>=6,<8",
+    "ruff>=0.9,<1",
+]
+
+[build-system]
+requires = ["hatchling>=1.25,<2"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/battleship"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "--import-mode=importlib"
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = [
+    "integration: requires TEST_DATABASE_URL pointing to a dedicated PostgreSQL database",
+    "e2e: requires two running HTTP services",
+    "performance: explicit network load test",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["battleship"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 90
